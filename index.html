@@ -1,0 +1,179 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.16/svg.min.js" integrity="sha512-p3Tp2zn+wApBreZCgRkmMwnfpN8MUPXzzOihXx7iGYXqE7t6m9drY8HeyMeeFuDWiTFKrGUrq3jpbT0vX6zY/Q==" crossorigin="anonymous"></script>
+	<script
+			  src="https://code.jquery.com/jquery-3.6.0.min.js"
+			  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			  crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/perspective-transform@1.1.3/dist/perspective-transform.min.js"></script>
+	<style>
+	html, body {
+	  width: 100%;
+	  height: 100%;
+	  background-color: black;
+	  color: #888;
+	}
+	#drawing {
+	  width: 100%;
+	  height: 100%;
+	  color: #FFF;
+	  fill: #888;
+	}
+	input[type=number] {
+	  width: 5em;
+	}
+	line {
+	  stroke-width: 1.0;
+	  stroke: #fff;
+	}
+	</style>
+  </head>
+  <body>
+  <table>
+	<tr>
+		<td></td>
+		<td>
+		extra upper
+		<input type="number" value="0" id="urow" name="urow" />
+		</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>
+		extra left
+		<input type="number" value="0" id="lcol" name="lcol" />
+		</td>
+		<td>
+			grid size
+			<input type="number" value="10" id="nrow" name="nrow" />
+			<input type="number" value="10" id="ncol" name="ncol" />
+		</td>
+		<td>
+		extra right
+		<input type="number" value="0" id="rcol" name="rcol" />
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+		extra lower
+		<input type="number" value="0" id="lrow" name="lrow" />
+		</td>
+		<td></td>
+	</tr>
+  </table>
+  <table>
+  <tr>
+	<td>
+	  A:
+	  <input type="number" id="ax" value="0" /> <input type="number" id="ay" value="0" />
+	</td>
+	<td>
+	  B:
+	  <input type="number" id="bx" value="640" /> <input type="number" id="by" value="0" />
+	</td>
+  </tr>
+  <tr>
+	<td>
+	  C:
+	  <input type="number" id="cx" value="0" /> <input type="number" id="cy" value="480" />
+	</td>
+	<td>
+	  D:
+	  <input type="number" id="dx" value="640" /> <input type="number" id="dy" value="480" />
+	</td>
+  </tr>
+  </table>
+<div id="drawing"></div>
+	<script>
+	var draw = SVG().addTo('#drawing').viewbox(0, 0, 640, 480)
+	function redraw() {
+		draw.clear()
+		var nrow = $('#nrow').val()*1;
+		var ncol = $('#ncol').val()*1;
+		var urow = $('#urow').val()*1;
+		var lrow = $('#lrow').val()*1;
+		var lcol = $('#lcol').val()*1;
+		var rcol = $('#rcol').val()*1;
+		var pa = [$('#ax').val()*1, $('#ay').val()*1];
+		var pb = [$('#bx').val()*1, $('#by').val()*1];
+		var pc = [$('#cx').val()*1, $('#cy').val()*1];
+		var pd = [$('#dx').val()*1, $('#dy').val()*1];
+		var r = 5;
+		var dota = draw.circle(r).x(pa[0]-r/2).y(pa[1]-r/2);
+		var dotb = draw.circle(r).x(pb[0]-r/2).y(pb[1]-r/2);
+		var dotc = draw.circle(r).x(pc[0]-r/2).y(pc[1]-r/2);
+		var dotd = draw.circle(r).x(pd[0]-r/2).y(pd[1]-r/2);
+		
+		var srcPsts = [0,0, ncol,0, 0,nrow, ncol,nrow];
+		var dstPnts = [pa[0],pa[1], pb[0],pb[1], pc[0],pc[1], pd[0],pd[1]];
+		var perspT = PerspT(srcPsts, dstPnts);
+		for (var s=0-lcol; s<=ncol+rcol; s++) {
+			var p1 = perspT.transform(s, 0-urow);
+			var p2 = perspT.transform(s, nrow+lrow);
+			draw.line(p1[0], p1[1], p2[0], p2[1]);
+				//.stroke({ width: 0.5, color: '#888', dasharray: '1,0' });
+		}
+		for (var s=0-urow; s<=nrow+lrow; s++) {
+			var p1 = perspT.transform(0-lcol, s);
+			var p2 = perspT.transform(ncol+rcol, s);
+			draw.line(p1[0], p1[1], p2[0], p2[1]);
+				//.stroke({ width: 0.5, color: '#888', dasharray: '1,0' });
+		}
+	}
+	
+	$('input[type=number]').change(redraw);
+	
+	redraw();
+	
+	
+	//var input = document.querySelector('input[type=text]')
+
+/*
+const moveHandler = function(e) {
+	console.log(e);
+	//this.move(this.cx + e.movementX, this.cy + e.movementY);
+}
+
+dot.mousedown(function (x, y) {
+  console.log(x, y);
+  console.log(this);
+  this.on('mousemove', moveHandler);
+})
+
+dot.mouseup(function (x, y) {
+  console.log(x, y);
+  this.off('mousemove', moveHandler);
+  console.log(this.node.cx, this.node.cy);
+	//this.move(this.node.cx, this.node.cy);
+})
+*/
+/*
+var text = draw.text(function(add) {
+	add.tspan( input.value )
+})
+
+textPath = text.path('M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80')
+/*
+textPath.animate(1000).ease('<>')
+	.plot('M10 80 C 40 150, 65 150, 95 80 S 150 10, 180 80')
+	.loop(true, true)
+*/
+/*
+input.addEventListener('keyup', updateText(textPath))
+
+function updateText(textPath) {
+	return function() {
+		textPath.tspan(this.value)
+	}				
+}
+*/
+	</script>
+  </body>
+</html>
+
+
+<!--
+https://github.com/jlouthan/perspective-transform
+
+-->
