@@ -1,0 +1,158 @@
+<html>
+    <head>
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+                background-color: #333;
+            }
+        </style>
+        <script>
+            matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+            scaleX = 1.0;
+            roll = 0;
+            function setMatrix() {
+                document.getElementById('matrix').value = JSON.stringify(matrix);
+                document.getElementById('scaleX').value = scaleX;
+                document.getElementById('roll').value = roll;
+                const matrixStr = [0, 1, 2, 3].map(c => matrix.map(row => row[c].toFixed(3)).join(', ')).join(', ');
+                // const matrixStr = matrix.map(row => row.map(col => col.toFixed(3)).join(', ')).join(', ');
+                console.log(matrixStr);
+                document.getElementById('img').style.transform = `perspective(500px) rotateZ(${roll}deg) scaleX(${scaleX}) matrix3d(${matrixStr})`;
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('file').addEventListener('change', function(e) {
+                    document.getElementById('img').src = URL.createObjectURL(e.target.files[0]);
+                });
+
+                document.getElementById('reset').addEventListener('click', function(e) {
+                    matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+                    setMatrix();
+                });
+                document.getElementById('resetRatio').addEventListener('click', function(e) {
+                    scaleX = 1.0;
+                    roll = 0;
+                    setMatrix();
+                });
+                document.getElementById('apply').addEventListener('click', function(e) {
+                    matrix = JSON.parse(document.getElementById('matrix').value);
+                    scaleX = parseFloat(document.getElementById('scaleX').value);
+                    roll = parseFloat(document.getElementById('roll').value);
+                    setMatrix();
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    // console.log(e.key);
+                    if (e.key === 'q') {
+                        matrix = mtxMult([matrix, rotateX(Math.PI / 180)]);
+                    }
+                    if (e.key === 'a') {
+                        matrix = mtxMult([matrix, rotateX(-Math.PI / 180)]);
+                    }
+                    if (e.key === 'w') {
+                        matrix = mtxMult([matrix, rotateY(Math.PI / 180)]);
+                    }
+                    if (e.key === 's') {
+                        matrix = mtxMult([matrix, rotateY(-Math.PI / 180)]);
+                    }
+                    if (e.key === 'e') {
+                        matrix = mtxMult([matrix, rotateZ(Math.PI / 180)]);
+                    }
+                    if (e.key === 'd') {
+                        matrix = mtxMult([matrix, rotateZ(-Math.PI / 180)]);
+                    }
+                    if (e.key === 'o') {
+                        matrix = mtxMult([matrix, translate(0, -10, 0)]);
+                    }
+                    if (e.key === 'l') {
+                        matrix = mtxMult([matrix, translate(0, 10, 0)]);
+                    }
+                    if (e.key === 'k') {
+                        matrix = mtxMult([matrix, translate(-10, 0, 0)]);
+                    }
+                    if (e.key === ';') {
+                        matrix = mtxMult([matrix, translate(10, 0, 0)]);
+                    }
+                    if (e.key === 'i') {
+                        matrix = mtxMult([matrix, translate(0, 0, 10)]);
+                    }
+                    if (e.key === 'p') {
+                        matrix = mtxMult([matrix, translate(0, 0, -10)]);
+                    }
+                    if (e.key === ',') {
+                        scaleX *= 1.01;
+                    }
+                    if (e.key === '.') {
+                        scaleX /= 1.01;
+                    }
+                    if (e.key === 'n') {
+                        roll += 1;
+                    }
+                    if (e.key === 'm') {
+                        roll -= 1;
+                    }
+                    setMatrix();
+                });
+            });
+
+            function mtxMult(arr) {
+                return arr.reduce((a, b) => {
+                    const retv = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+                    for (let i = 0; i < 4; i++) {
+                        for (let j = 0; j < 4; j++) {
+                            for (let k = 0; k < 4; k++) {
+                                retv[i][j] += a[i][k] * b[k][j];
+                            }
+                        }
+                    }
+                    return retv;
+                });
+            }
+
+            const rotateX = angle => [
+                [1, 0, 0, 0],
+                [0, Math.cos(angle), -Math.sin(angle), 0],
+                [0, Math.sin(angle), Math.cos(angle), 0],
+                [0, 0, 0, 1]
+            ];
+            const rotateY = angle => [
+                [Math.cos(angle), 0, Math.sin(angle), 0],
+                [0, 1, 0, 0],
+                [-Math.sin(angle), 0, Math.cos(angle), 0],
+                [0, 0, 0, 1]
+            ];
+            const rotateZ = angle => [
+                [Math.cos(angle), -Math.sin(angle), 0, 0],
+                [Math.sin(angle), Math.cos(angle), 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ];
+            const translate = (x, y, z) => [
+                [1, 0, 0, x],
+                [0, 1, 0, y],
+                [0, 0, 1, z],
+                [0, 0, 0, 1]
+            ];
+        </script>
+    </head>
+    <body>
+        <div>
+            <input type="file" id="file" accept="image/*"/>
+            <input type="button" id="reset" value="Reset"/>
+            <input type="button" id="resetRatio" value="reset ratio&roll"/>
+            <input type="text" id="matrix"/>
+            <input type="text" id="scaleX"/>
+            <input type="text" id="roll"/>
+            <input type="button" id="apply" value="Apply"/>
+        </div>
+        <div style="overflow: hidden; flex-grow: 1;">
+            <img src="wall.svg" id="img" />
+        </div>
+    </body>
+</html>
