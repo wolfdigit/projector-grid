@@ -1,0 +1,115 @@
+<html>
+
+<head>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #333;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/perspective-transform@1.1.3/dist/perspective-transform.min.js"></script>
+    <script>
+        dstPnts = [[0, 0], [100.0, 0], [100.0, 100.0], [0, 100.0]];
+        moving = 0;
+
+        function resetPnts() {
+            const img = document.getElementById('img');
+            dstPnts = [[0, 0], [img.naturalWidth, 0], [img.naturalWidth, img.naturalHeight], [0, img.naturalHeight]];
+        }
+
+        function setMatrix() {
+            const flatten = src => src.reduce((a, b) => a.concat(b), []);
+
+            document.getElementById('matrix').value = JSON.stringify(dstPnts);
+            const img = document.getElementById('img');
+            const srcPnts = [[0, 0], [img.naturalWidth, 0], [img.naturalWidth, img.naturalHeight], [0, img.naturalHeight]];
+            const perspT = PerspT(flatten(srcPnts), flatten(dstPnts));
+
+            const c = perspT.coeffs;
+            const matrix = [[c[0], c[3], 0, c[6]],
+                            [c[1], c[4], 0, c[7]],
+                            [0, 0, 1, 0],
+                            [c[2], c[5], 0, 1]];
+
+            matrix.forEach(row => console.log(row.map(e => e.toFixed(8)).join(', ')));
+            const matrixStr = flatten(matrix).map(e => e.toFixed(8)).join(', ');
+            document.getElementById('img').style.transform = `translate(-50%,-50%) matrix3d(${matrixStr}) translate(50%,50%)`;
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('file').addEventListener('change', function (e) {
+                document.getElementById('img').src = URL.createObjectURL(e.target.files[0]);
+                resetPnts();
+            });
+            resetPnts();
+
+            document.getElementById('reset').addEventListener('click', resetPnts);
+            document.getElementById('apply').addEventListener('click', function (e) {
+                matrix = JSON.parse(document.getElementById('points').value);
+                setMatrix();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'q') {
+                    moving = 0;
+                }
+                if (e.key === 'w') {
+                    moving = 1;
+                }
+                if (e.key === 's') {
+                    moving = 2;
+                }
+                if (e.key === 'a') {
+                    moving = 3;
+                }
+                if (e.key === 'o') {
+                    dstPnts[moving][1] -= 10;
+                }
+                if (e.key === 'l') {
+                    dstPnts[moving][1] += 10;
+                }
+                if (e.key === 'k') {
+                    dstPnts[moving][0] -= 10;
+                }
+                if (e.key === ';') {
+                    dstPnts[moving][0] += 10;
+                }
+                if (e.key === 'O') {
+                    dstPnts[moving][1] -= 1;
+                }
+                if (e.key === 'L') {
+                    dstPnts[moving][1] += 1;
+                }
+                if (e.key === 'K') {
+                    dstPnts[moving][0] -= 1;
+                }
+                if (e.key === ':') {
+                    dstPnts[moving][0] += 1;
+                }
+                setMatrix();
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div>
+        <input type="file" id="file" accept="image/*" />
+        <input type="text" id="points" size="30"/>
+        <input type="button" id="apply" value="Apply" />
+        <input type="button" id="reset" value="Reset" />
+    </div>
+    <div style="overflow: hidden; flex-grow: 1;">
+        <img src="wall.svg" id="img" />
+    </div>
+</body>
+
+</html>

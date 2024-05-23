@@ -67,6 +67,24 @@
                     if (e.key === 'd') {
                         matrix = mtxMult([matrix, rotateZ(-Math.PI / 180)]);
                     }
+                    if (e.key === 'Q') {
+                        matrix = mtxMult([matrix, rotateX(Math.PI / 180 * 0.1)]);
+                    }
+                    if (e.key === 'A') {
+                        matrix = mtxMult([matrix, rotateX(-Math.PI / 180 * 0.1)]);
+                    }
+                    if (e.key === 'W') {
+                        matrix = mtxMult([matrix, rotateY(Math.PI / 180 * 0.1)]);
+                    }
+                    if (e.key === 'S') {
+                        matrix = mtxMult([matrix, rotateY(-Math.PI / 180 * 0.1)]);
+                    }
+                    if (e.key === 'E') {
+                        matrix = mtxMult([matrix, rotateZ(Math.PI / 180 * 0.1)]);
+                    }
+                    if (e.key === 'D') {
+                        matrix = mtxMult([matrix, rotateZ(-Math.PI / 180 * 0.1)]);
+                    }
                     if (e.key === 'o') {
                         matrix = mtxMult([matrix, translate(0, -10, 0)]);
                     }
@@ -90,6 +108,30 @@
                     }
                     if (e.key === '.') {
                         scaleX /= 1.01;
+                    }
+                    if (e.key === 'O') {
+                        matrix = mtxMult([matrix, translate(0, -1, 0)]);
+                    }
+                    if (e.key === 'L') {
+                        matrix = mtxMult([matrix, translate(0, 1, 0)]);
+                    }
+                    if (e.key === 'K') {
+                        matrix = mtxMult([matrix, translate(-1, 0, 0)]);
+                    }
+                    if (e.key === ':') {
+                        matrix = mtxMult([matrix, translate(1, 0, 0)]);
+                    }
+                    if (e.key === 'I') {
+                        matrix = mtxMult([matrix, translate(0, 0, 1)]);
+                    }
+                    if (e.key === 'P') {
+                        matrix = mtxMult([matrix, translate(0, 0, -1)]);
+                    }
+                    if (e.key === '<') {
+                        scaleX *= 1.001;
+                    }
+                    if (e.key === '>') {
+                        scaleX /= 1.001;
                     }
                     if (e.key === 'n') {
                         roll += 1;
